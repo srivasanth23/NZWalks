@@ -121,7 +121,7 @@ options.TokenValidationParameters = new TokenValidationParameters
 var app = builder.Build();
 
 
-
+// Middleware's
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -130,7 +130,6 @@ if (app.Environment.IsDevelopment())
 }
 app.UseMiddleware<ExceptionHandellerMiddleware>();
 app.UseHttpsRedirection();
-
 app.UseAuthentication(); // We are adding because we need to to authenticate before authorization
 app.UseAuthorization();
 
