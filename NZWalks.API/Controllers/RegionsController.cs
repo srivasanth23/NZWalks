@@ -35,7 +35,7 @@ namespace NZWalks.API.Controllers
         // GET all regions
         // GET : https://localhost:7090/api/regions
         [HttpGet]
-        [Authorize(Roles = "Reader")]
+        [Authorize(Roles = "Reader, Writer")]
         public async Task<IActionResult> GetAll()
         {
             // below line will log in console
@@ -71,7 +71,7 @@ namespace NZWalks.API.Controllers
         // GET : https://localhost:7090/api/regions/{id}
         [HttpGet]
         [Route("{id:Guid}")] // as we require id from user we are adding this
-        [Authorize (Roles = "Reader")]
+        [Authorize(Roles = "Reader, Writer")]
         public async Task<IActionResult> GetById(Guid id)
         {
             // Get region domain model from database
@@ -93,7 +93,7 @@ namespace NZWalks.API.Controllers
         // POST : https://localhost:portnumber/api/regions
         [HttpPost]
         [ValidateModelAttribute]
-        [Authorize (Roles = "Writer")]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDTO addRegionRequestDTO)
         {
             //if (ModelState.IsValid) // Here we are doing model validation by using Annotations
