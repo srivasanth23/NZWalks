@@ -4,7 +4,7 @@ using NZWalks.UI.Models.DTO;
 using System.Text;
 using System.Text.Json;
 
-namespace NZWalks.UI.Controllers
+namespace NZregions.UI.Controllers
 {
     public class RegionsController : Controller
     {
@@ -121,5 +121,135 @@ namespace NZWalks.UI.Controllers
 
             return View(model);
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var token = GetToken();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var httpRequestMsg = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Get,
+                    RequestUri = new Uri($"https://localhost:7050/api/regions/{id.ToString()}")
+                };
+
+                // Attach token for secqured API
+                httpRequestMsg.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var httpResponseMsg = await client.SendAsync(httpRequestMsg);
+                httpResponseMsg.EnsureSuccessStatusCode();
+
+                if (httpResponseMsg.IsSuccessStatusCode)
+                {
+                    // Deserialize JSON into RegionDTO
+                    var region = await httpResponseMsg.Content.ReadFromJsonAsync<RegionDTO>();
+                    if (region != null)
+                    {
+                        return View(region);
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Failed to fetch region. Status: " + httpResponseMsg.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error getting region: " + ex.Message);
+            }
+            return View(null);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(RegionDTO model)
+        {
+            var token = GetToken();
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+
+                var httpRequestMsg = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Put,
+                    RequestUri = new Uri($"https://localhost:7050/api/regions/{model.Id}"),
+                    Content = new StringContent(JsonSerializer.Serialize(model), Encoding.UTF8, "application/json"),
+                };
+
+                // Attach the token 
+                httpRequestMsg.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var httpResponseMsg = await client.SendAsync(httpRequestMsg);
+
+                if (httpResponseMsg.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Index");
+                }
+
+                ModelState.AddModelError("", "Error updating region. Please try again.");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error updating region: " + ex.Message);
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var token = GetToken();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+
+                var httpRequestMsg = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Delete,
+                    RequestUri = new Uri($"https://localhost:7050/api/regions/{id}")
+                };
+
+                // ✅ Attach token for secured API
+                httpRequestMsg.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var httpResponseMsg = await client.SendAsync(httpRequestMsg);
+
+                if (httpResponseMsg.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Index");
+                }
+
+                ModelState.AddModelError("", "Error deleting region. Please try again.");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error deleting region: " + ex.Message);
+            }
+
+            return RedirectToAction("Index");
+        }
+
     }
 }

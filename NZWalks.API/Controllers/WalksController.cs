@@ -12,7 +12,6 @@ namespace NZWalks.API.Controllers
     // /api/walks
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Role)]
     public class WalksController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -30,6 +29,7 @@ namespace NZWalks.API.Controllers
         // POST : https://localhost:potnumber/api/walks
         [HttpPost]
         [ValidateModelAttribute]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Create([FromBody] AddrequestWalksDTO addrequestWalksDTO)
         {
 
@@ -46,6 +46,7 @@ namespace NZWalks.API.Controllers
         // GET Walks
         // GET : https://localhost:portnumber/api/walks?filterOn=Name&filterQuery=Track&sortBy=Name&isAscending=true
         [HttpGet]
+        [Authorize(Roles = "Reader, Writer")]
         public async Task<ActionResult> GetAllWalks([FromQuery] string? filterOn, [FromQuery] string? filterQuery,
             [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
             [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 1000)
@@ -62,6 +63,7 @@ namespace NZWalks.API.Controllers
         // GET : https://localhost:portnumber/api/walks/:id
         [HttpGet]
         [Route("{id:Guid}")]
+        [Authorize(Roles = "Reader, Writer")]
         public async Task<IActionResult> GetWalkById([FromRoute] Guid id)
         {
             var walksDomainModel = await _walkRepo.GetWalkByIdAsync(id);
@@ -81,6 +83,7 @@ namespace NZWalks.API.Controllers
         [HttpPut]
         [Route("{id:Guid}")]
         [ValidateModelAttribute]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateWalkRequestDTO updateWalkRequestDTO)
         {
 
@@ -100,6 +103,7 @@ namespace NZWalks.API.Controllers
         // DELETE : https://localhost:portnumber/api/walks/:id
         [HttpDelete]
         [Route("{id:Guid}")]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var walksDomainModel = await _walkRepo.DeleteWalkAsync(id);
